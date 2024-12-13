@@ -9,7 +9,7 @@ interface IButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export default function Button({ className, children, href, ...rest }: PropsWithChildren<IButtonProps>) {
   if (href) {
     return (
-      <Link to={href} className={`${className} w-full py-2 rounded text-center`}>
+      <Link to={href} className={`${className} py-2 rounded text-center`}>
         {children}
       </Link>
     );
