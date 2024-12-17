@@ -6,13 +6,13 @@ export default function useAuth() {
   const [cookies, removeCookie] = useCookies();
 
   function handleLogin() {
-    if (cookies.accessToken) setIsAuth(true);
+    if (cookies.access_token) setIsAuth(true);
   }
 
   function handleLogout() {
     setIsAuth(false);
-    removeCookie('accessToken', { path: '/' });
-    removeCookie('refreshToken', { path: '/' });
+    removeCookie('access_token', { path: '/' });
+    removeCookie('refresh_token', { path: '/' });
   }
 
   return {
