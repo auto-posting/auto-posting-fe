@@ -7,8 +7,6 @@ import { useCookies } from 'react-cookie';
 
 function ProtectedRoute({ element }: { element: JSX.Element }) {
   const [cookies] = useCookies();
-  console.log(cookies);
-  console.log(cookies.access_token);
   return cookies.access_token ? element : <Navigate to="/login" />;
 }
 
