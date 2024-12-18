@@ -7,7 +7,7 @@ import { useCookies } from 'react-cookie';
 
 function ProtectedRoute({ element }: { element: JSX.Element }) {
   const [cookies] = useCookies();
-  return cookies.access_token ? element : <Navigate to="/login" />;
+  return cookies.access_token && cookies.access_token !== "%7B%22path%22%3A%22%2F%22%7D" ? element : <Navigate to="/login" />;
 }
 
 const router = createBrowserRouter([
