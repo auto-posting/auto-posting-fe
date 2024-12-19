@@ -7,7 +7,7 @@ export default function useAuth() {
   const [cookies, removeCookies] = useCookies();
 
   function handleLogin() {
-    if (cookies.access_token) setIsAuth(true);
+    if (!!cookies.access_token) setIsAuth(true);
   }
 
   function handleLogout() {
