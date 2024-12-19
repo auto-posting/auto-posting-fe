@@ -4,7 +4,7 @@ import My from '@/pages/my';
 import Setting from '@/pages/setting';
 import Layout from '../ui/Layout';
 import { useCookies } from 'react-cookie';
-import GoogleCallback from '@/pages/callback/google';
+import GoogleCallback from '@/pages/googleCallback';
 
 function ProtectedRoute({ element }: { element: JSX.Element }) {
   const [cookies] = useCookies(['access_token']);
