@@ -4,10 +4,11 @@ import My from '@/pages/my';
 import Setting from '@/pages/setting';
 import Layout from '../ui/Layout';
 import { useCookies } from 'react-cookie';
+import GoogleCallback from '@/pages/callback/google';
 
 function ProtectedRoute({ element }: { element: JSX.Element }) {
-  const [cookies] = useCookies();
-  return cookies.access_token ? element : <Navigate to="/login" />;
+  const [cookies] = useCookies(['access_token']);
+  return cookies.access_token && cookies.access_token !== 'undefined' ? element : <Navigate to="/login" />;
 }
 
 const router = createBrowserRouter([
@@ -16,8 +17,12 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
+    path: '/auth/google/callback',
+    element: <GoogleCallback />,
+  },
+  {
     path: '/',
-    element: <Layout />,
+    element: <ProtectedRoute element={<Layout />} />,
     children: [
       {
         path: '',
