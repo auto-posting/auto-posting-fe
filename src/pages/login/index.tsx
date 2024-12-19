@@ -4,6 +4,7 @@ import { API_BASE_URL } from '@/shared/config/constants';
 
 export default function Login() {
   const isLocal = window.location.origin.includes('127') ? true : false;
+
   return (
     <main className="w-full h-full flex flex-col justify-center items-center">
       <h1 className="text-main">AUTOPO</h1>
