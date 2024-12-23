@@ -20,18 +20,30 @@ interface Select {
 
 export default function Select({ title, items }: Select) {
   const toggleState = useToggle();
-  const [selectItems] = useState(items);
+  const [selectItems, setSelectItems] = useState(items);
+
+  function handleDeleteItem(index: number) {
+    setSelectItems(prevItems => prevItems.filter((_, i) => i !== index));
+  }
 
   return (
     <SelectContext.Provider value={toggleState}>
       <SelectComponent.Root>
-        <p className="flex justify-between">{title}</p>
+        <div className="flex justify-between">
+          {title}
+          <button className="px-1 border bg-sub text-white font-bold rounded-lg">추가</button>
+        </div>
         <SelectComponent.Trigger>{title}</SelectComponent.Trigger>
         <SelectComponent.Group>
           {selectItems.map((item, index) => (
             <Fragment key={`item-${index}`}>
               <SelectComponent.Item>
-                <p>{item}</p>
+                <div className={`flex items-center justify-between`}>
+                  <p>{item}</p>
+                  <button role="delete" onClick={() => handleDeleteItem(index)}>
+                    ✕
+                  </button>
+                </div>
               </SelectComponent.Item>
               <hr />
             </Fragment>
