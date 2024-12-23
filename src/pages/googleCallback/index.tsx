@@ -24,8 +24,8 @@ export default function GoogleCallback() {
   useEffect(() => {
     if (data) {
       if (data.success) {
-        setCookie('access_token', data.tokens.access, { path: '/' });
-        setCookie('refresh_token', data.tokens.refresh, { path: '/' });
+        setCookie('access_token', data.tokens.access, { path: '/', secure: true, sameSite: 'lax' });
+        setCookie('refresh_token', data.tokens.refresh, { path: '/', secure: true, sameSite: 'lax' });
         navigate('/my');
       } else {
         navigate('/login');
