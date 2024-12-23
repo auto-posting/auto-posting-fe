@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 interface FetchResponse<T> {
   loading: boolean;
@@ -12,15 +12,8 @@ const useFetch = <T>(fetchFunction: () => Promise<{ data: T } | undefined>): Fet
   const [error, setError] = useState<boolean | undefined>(undefined);
   const [data, setData] = useState<T | null>(null);
 
-  const useEffectOnce = (callback: () => void) => {
-    useEffect(() => {
-      callback();
-    }, []);
-  };
-
-  const execute = async () => {
-    if (loading) return;
-    if (data) return;
+  const execute = useCallback(async () => {
+    if (loading || data) return;
 
     setLoading(true);
     setError(undefined);
@@ -39,9 +32,8 @@ const useFetch = <T>(fetchFunction: () => Promise<{ data: T } | undefined>): Fet
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, data, fetchFunction]);
 
-  useEffectOnce(execute);
   return { execute, loading, error, data };
 };
 
