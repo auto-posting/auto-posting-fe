@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/shared/api/axiosInstance';
+import { authAxiosInstance } from '@/shared/api/authAxiosInstance';
 
 interface Code {
   code: string | false | null;
@@ -18,7 +18,7 @@ interface GoogleCallbackData {
 const isLocal = window.location.origin.includes('127') ? true : false;
 
 export async function getGoogleAuth({ code }: Code): Promise<{ data: GoogleCallbackData } | undefined> {
-  const response = await axiosInstance.get<GoogleCallbackData>(
+  const response = await authAxiosInstance.get<GoogleCallbackData>(
     `/api/auth/google/callback${isLocal ? '/local' : ''}?code=${code}`
   );
   return { data: response.data };
@@ -26,7 +26,7 @@ export async function getGoogleAuth({ code }: Code): Promise<{ data: GoogleCallb
 
 export async function logout() {
   try {
-    const response = await axiosInstance.get('/api/auth/logout');
+    const response = await authAxiosInstance.get('/api/auth/logout');
     return response.data;
   } catch (error) {
     console.error('Logout failed:', error);
