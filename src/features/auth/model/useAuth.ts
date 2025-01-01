@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
-//import { logout } from '../api/authApi';
 
 export default function useAuth() {
   const [isAuth, setIsAuth] = useState(false);
@@ -14,7 +13,6 @@ export default function useAuth() {
     removeCookies('access_token', undefined, { path: '/' });
     removeCookies('refresh_token', undefined, { path: '/' });
     setIsAuth(false);
-    //logout();
   }
 
   return {
