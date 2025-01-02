@@ -8,6 +8,8 @@ import { useCallback, useEffect, useState } from 'react';
 import useModal from '@/shared/model/useModal';
 import Table from '@/shared/ui/Table';
 import { COUPANG_THEAD } from '@/features/coupangPartners/config/constants';
+import { OPENAI_THEAD } from '@/features/openAi/config/constants';
+import { deleteOpenai, getOpenai } from '@/features/openAi/api';
 
 export default function My() {
   const [isMyInfo, setIsMyInfo] = useState(true);
@@ -18,14 +20,21 @@ export default function My() {
 
   const { data: userInfoData, loading: userInfoLoading, execute: userInfoExecute } = useFetch(() => userInfo());
   const { data: coupangData, loading: coupangLoading, execute: coupangExecute } = useFetch(() => getCoupangPartners());
-  const { execute: deleteExecute } = useFetch((params?: { coupangpartners_id: number }) => {
+  const { data: openaiData, loading: openaiLoading, execute: openaiExecute } = useFetch(() => getOpenai());
+  const { execute: deleteCoupangExecute } = useFetch((params?: { coupangpartners_id: number }) => {
     if (!params) {
       console.error('Params are undefined');
       return Promise.reject(new Error('Params are undefined'));
     }
     return deleteCoupangPartners(params);
   });
-
+  const { execute: deleteOpenaiExecute } = useFetch((params?: { openai_id: number }) => {
+    if (!params) {
+      console.error('Params are undefined');
+      return Promise.reject(new Error('Params are undefined'));
+    }
+    return deleteOpenai(params);
+  });
   const { open } = useModal();
 
   const fetchUserData = useCallback(() => {
@@ -34,13 +43,26 @@ export default function My() {
     }
   }, [userInfoData, userInfoLoading, userInfoExecute]);
 
-  const handleDelete = async (rowIndex: number) => {
+  const handleCoupangDelete = async (rowIndex: number) => {
     const coupangpartnersId = Number(coupangData?.data[rowIndex].id);
 
     if (coupangpartnersId !== undefined) {
       try {
-        await deleteExecute({ coupangpartners_id: coupangpartnersId });
+        await deleteCoupangExecute({ coupangpartners_id: coupangpartnersId });
         coupangExecute();
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+    }
+  };
+
+  const handleOpenaiDelete = async (rowIndex: number) => {
+    const openaiId = Number(openaiData?.data[rowIndex].id);
+
+    if (openaiId !== undefined) {
+      try {
+        await deleteOpenaiExecute({ openai_id: openaiId });
+        openaiExecute();
       } catch (error) {
         console.error('Delete failed:', error);
       }
@@ -53,10 +75,17 @@ export default function My() {
     }
   }, [coupangData, coupangLoading, coupangExecute]);
 
+  const fetchOpenaiData = useCallback(() => {
+    if (!openaiLoading && !openaiData) {
+      openaiExecute();
+    }
+  }, [openaiData, openaiLoading, openaiExecute]);
+
   useEffect(() => {
     fetchUserData();
+    fetchOpenaiData();
     fetchCoupangData();
-  }, [fetchUserData, fetchCoupangData]);
+  }, [fetchUserData, fetchOpenaiData, fetchCoupangData]);
 
   return (
     <main className="flex justify-between px-20 py-20">
@@ -80,7 +109,7 @@ export default function My() {
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
             <h2>워드프레스</h2>
-            <button onClick={open} className="px-1 border bg-sub text-white font-bold rounded-lg">
+            <button onClick={() => open('wordpress')} className="px-1 border bg-sub text-white font-bold rounded-lg">
               추가
             </button>
           </div>
@@ -88,19 +117,20 @@ export default function My() {
         <div className="flex flex-col gap-1 pb-2">
           <div className="flex justify-between">
             <h2>쿠팡파트너스</h2>
-            <button onClick={open} className="px-1 border bg-sub text-white font-bold rounded-lg">
+            <button onClick={() => open('coupang')} className="px-1 border bg-sub text-white font-bold rounded-lg">
               추가
             </button>
           </div>
-          <Table theadData={COUPANG_THEAD} tbodyData={coupangData?.data} onDelete={handleDelete} />
+          <Table theadData={COUPANG_THEAD} tbodyData={coupangData?.data} onDelete={handleCoupangDelete} />
         </div>
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
             <h2>GPT</h2>
-            <button onClick={open} className="px-1 border bg-sub text-white font-bold rounded-lg">
+            <button onClick={() => open('openai')} className="px-1 border bg-sub text-white font-bold rounded-lg">
               추가
             </button>
           </div>
+          <Table theadData={OPENAI_THEAD} tbodyData={openaiData?.data} onDelete={handleOpenaiDelete} />
         </div>
       </section>
     </main>
