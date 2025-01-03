@@ -10,6 +10,8 @@ import Table from '@/shared/ui/Table';
 import { COUPANG_THEAD } from '@/features/coupangPartners/config/constants';
 import { OPENAI_THEAD } from '@/features/openAi/config/constants';
 import { deleteOpenai, getOpenai } from '@/features/openAi/api';
+import { deleteWordpress, getWordpress } from '@/features/wordPress/api';
+import { WORDPRESS_THEAD } from '@/features/wordPress/config/constants';
 
 export default function My() {
   const [isMyInfo, setIsMyInfo] = useState(true);
@@ -21,6 +23,8 @@ export default function My() {
   const { data: userInfoData, loading: userInfoLoading, execute: userInfoExecute } = useFetch(() => userInfo());
   const { data: coupangData, loading: coupangLoading, execute: coupangExecute } = useFetch(() => getCoupangPartners());
   const { data: openaiData, loading: openaiLoading, execute: openaiExecute } = useFetch(() => getOpenai());
+  const { data: wordpressData, loading: wordpressLoading, execute: wordpressExecute } = useFetch(() => getWordpress());
+
   const { execute: deleteCoupangExecute } = useFetch((params?: { coupangpartners_id: number }) => {
     if (!params) {
       console.error('Params are undefined');
@@ -35,6 +39,14 @@ export default function My() {
     }
     return deleteOpenai(params);
   });
+  const { execute: deleteWordpressExecute } = useFetch((params?: { wordpress_id: number }) => {
+    if (!params) {
+      console.error('Params are undefined');
+      return Promise.reject(new Error('Params are undefined'));
+    }
+    return deleteWordpress(params);
+  });
+
   const { open } = useModal();
 
   const fetchUserData = useCallback(() => {
@@ -69,6 +81,19 @@ export default function My() {
     }
   };
 
+  const handleWordpressDelete = async (rowIndex: number) => {
+    const wordpressId = Number(wordpressData?.data[rowIndex].id);
+
+    if (wordpressId !== undefined) {
+      try {
+        await deleteWordpressExecute({ wordpress_id: wordpressId });
+        wordpressExecute();
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+    }
+  };
+
   const fetchCoupangData = useCallback(() => {
     if (!coupangLoading && !coupangData) {
       coupangExecute();
@@ -81,15 +106,22 @@ export default function My() {
     }
   }, [openaiData, openaiLoading, openaiExecute]);
 
+  const fetchWordpressData = useCallback(() => {
+    if (!wordpressLoading && !wordpressData) {
+      wordpressExecute();
+    }
+  }, [wordpressData, wordpressLoading, wordpressExecute]);
+
   useEffect(() => {
     fetchUserData();
     fetchOpenaiData();
     fetchCoupangData();
-  }, [fetchUserData, fetchOpenaiData, fetchCoupangData]);
+    fetchWordpressData();
+  }, [fetchUserData, fetchOpenaiData, fetchCoupangData, fetchWordpressData]);
 
   return (
     <main className="flex justify-between px-20 py-20">
-      <section className="py-20 w-[45%] h-[80%] border-4 border-sub rounded-lg flex flex-col justify-center items-center gap-20">
+      <section className="py-20 w-[30%] h-[80%] border-4 border-sub rounded-lg flex flex-col justify-center items-center gap-20">
         <img src={user} className="w-[50%]" />
         <div className="w-[90%] flex flex-col gap-4">
           <Button
@@ -104,7 +136,7 @@ export default function My() {
           </Button>
         </div>
       </section>
-      <section className="w-[45%] h-[80%] flex flex-col justify-center gap-4">
+      <section className="w-[65%] h-[80%] flex flex-col justify-center gap-4">
         <Input label="이메일" value={userInfoData?.user.email || ''} error={''} disabled />
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
@@ -113,6 +145,7 @@ export default function My() {
               추가
             </button>
           </div>
+          <Table theadData={WORDPRESS_THEAD} tbodyData={wordpressData?.data} onDelete={handleWordpressDelete} />
         </div>
         <div className="flex flex-col gap-1 pb-2">
           <div className="flex justify-between">

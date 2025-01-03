@@ -7,6 +7,7 @@ import Input from '../ui/Input';
 import { getCoupangPartners, postCoupangPartners } from '@/features/coupangPartners/api';
 import useFetch from './useFetch';
 import { getOpenai, postOpenai } from '@/features/openAi/api';
+import { postWordpress } from '@/features/wordPress/api';
 
 export type ModalType = 'wordpress' | 'coupang' | 'openai';
 
@@ -22,10 +23,10 @@ export function ModalProvider({ children }: Children) {
   const { isOpen, open, close, openModal } = useModalOpen();
   const [formData, setFormData] = useState({
     wordpress: {
-      wp_id: '',
-      wp_password: '',
-      wp_url: '',
-      wp_nickname: '',
+      name: '',
+      password: '',
+      url: '',
+      nickname: '',
     },
     coupang: {
       api_key: '',
@@ -54,6 +55,16 @@ export function ModalProvider({ children }: Children) {
     })
   );
 
+  const { data: wordpressData, execute: wordpressExecute } = useFetch(() => getOpenai());
+  const { execute: postWordpressExecute } = useFetch(() =>
+    postWordpress({
+      name: formData.wordpress.name,
+      password: formData.wordpress.password,
+      url: formData.wordpress.url,
+      nickname: formData.wordpress.nickname,
+    })
+  );
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
@@ -64,6 +75,10 @@ export function ModalProvider({ children }: Children) {
       },
       openai: {
         ...prevState.coupang,
+        [name]: value,
+      },
+      wordpress: {
+        ...prevState.wordpress,
         [name]: value,
       },
     }));
@@ -94,6 +109,14 @@ export function ModalProvider({ children }: Children) {
         await postOpenaiExecute();
         await openaiExecute();
       }
+      if (currentModal === 'wordpress') {
+        if (!formData.wordpress.name.trim() || !formData.wordpress.password || !formData.wordpress.url) {
+          alert('값을 입력하세요.');
+          return;
+        }
+        await postWordpressExecute();
+        await wordpressExecute();
+      }
 
       close();
       alert('처리가 완료되었습니다.');
@@ -110,7 +133,10 @@ export function ModalProvider({ children }: Children) {
     if (openaiData) {
       console.log('Fetched data:', openaiData);
     }
-  }, [coupangData, openaiData]);
+    if (wordpressData) {
+      console.log('Fetched data:', wordpressData);
+    }
+  }, [coupangData, openaiData, wordpressData]);
 
   return (
     <ModalContext.Provider value={{ isOpen, open, close }}>
@@ -161,6 +187,44 @@ export function ModalProvider({ children }: Children) {
               name="nickname"
               type="text"
               value={formData.openai.nickname}
+              onChange={handleInputChange}
+              placeholder="추가할 값을 입력해주세요"
+            />
+          </Modal>,
+          document.body
+        )}
+      {isOpen('wordpress') &&
+        createPortal(
+          <Modal isOpen onClose={close} onSubmit={handleSubmit}>
+            <Input
+              label="Wordpress URL"
+              name="url"
+              type="text"
+              value={formData.wordpress.url}
+              onChange={handleInputChange}
+              placeholder="추가할 값을 입력해주세요"
+            />
+            <Input
+              label="Wordpress Name"
+              name="name"
+              type="text"
+              value={formData.wordpress.name}
+              onChange={handleInputChange}
+              placeholder="추가할 값을 입력해주세요"
+            />
+            <Input
+              label="Wordpress PASSWORD"
+              name="password"
+              type="text"
+              value={formData.wordpress.password}
+              onChange={handleInputChange}
+              placeholder="추가할 값을 입력해주세요"
+            />
+            <Input
+              label="Wordpress Nickname"
+              name="nickname"
+              type="text"
+              value={formData.wordpress.nickname}
               onChange={handleInputChange}
               placeholder="추가할 값을 입력해주세요"
             />
