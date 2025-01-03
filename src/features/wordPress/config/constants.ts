@@ -1,1 +1,1 @@
-export const WORDPRESS_THEAD = ['nickname, id, password, url'];
+export const WORDPRESS_THEAD = ['Nickname', 'Name', 'Password', 'Url'];

@@ -6,10 +6,10 @@ type GetWordpressResponse = {
 };
 
 type PostWordpressResquest = {
-  wp_id: '';
-  wp_password: '';
-  wp_url: '';
-  wp_nickname: '';
+  name: string;
+  password: string;
+  url: string;
+  nickname: string;
 };
 
 type DeleteWordpressResquest = {

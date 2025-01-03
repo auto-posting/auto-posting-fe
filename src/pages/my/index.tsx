@@ -82,11 +82,11 @@ export default function My() {
   };
 
   const handleWordpressDelete = async (rowIndex: number) => {
-    const openaiId = Number(openaiData?.data[rowIndex].id);
+    const wordpressId = Number(wordpressData?.data[rowIndex].id);
 
-    if (openaiId !== undefined) {
+    if (wordpressId !== undefined) {
       try {
-        await deleteWordpressExecute({ wordpress_id: openaiId });
+        await deleteWordpressExecute({ wordpress_id: wordpressId });
         wordpressExecute();
       } catch (error) {
         console.error('Delete failed:', error);
@@ -121,7 +121,7 @@ export default function My() {
 
   return (
     <main className="flex justify-between px-20 py-20">
-      <section className="py-20 w-[45%] h-[80%] border-4 border-sub rounded-lg flex flex-col justify-center items-center gap-20">
+      <section className="py-20 w-[30%] h-[80%] border-4 border-sub rounded-lg flex flex-col justify-center items-center gap-20">
         <img src={user} className="w-[50%]" />
         <div className="w-[90%] flex flex-col gap-4">
           <Button
@@ -136,7 +136,7 @@ export default function My() {
           </Button>
         </div>
       </section>
-      <section className="w-[45%] h-[80%] flex flex-col justify-center gap-4">
+      <section className="w-[65%] h-[80%] flex flex-col justify-center gap-4">
         <Input label="이메일" value={userInfoData?.user.email || ''} error={''} disabled />
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
