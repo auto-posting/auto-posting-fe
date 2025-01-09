@@ -8,8 +8,10 @@ import { getCoupangPartners, postCoupangPartners } from '@/features/coupangPartn
 import useFetch from './useFetch';
 import { getOpenai, postOpenai } from '@/features/openAi/api';
 import { postWordpress } from '@/features/wordPress/api';
+import { DATE, HOUR, MINUTE } from '../config/constants/time';
+import Select from '@/shared/ui/Select/settingSelect';
 
-export type ModalType = 'wordpress' | 'coupang' | 'openai';
+export type ModalType = 'wordpress' | 'coupang' | 'openai' | 'setting';
 
 export interface ModalContext {
   isOpen: (modalType: ModalType) => boolean;
@@ -36,6 +38,15 @@ export function ModalProvider({ children }: Children) {
     openai: {
       api_key: '',
       nickname: '',
+    },
+    setting: {
+      wordpress_id: 0,
+      coupang_id: 0,
+      gpt_id: 0,
+      gpt_topic_id: 0,
+      interval_days: 0,
+      interval_hours: 0,
+      interval_minutes: 0,
     },
   });
   const { data: coupangData, execute: coupangExecute } = useFetch(() => getCoupangPartners());
@@ -79,6 +90,10 @@ export function ModalProvider({ children }: Children) {
       },
       wordpress: {
         ...prevState.wordpress,
+        [name]: value,
+      },
+      setting: {
+        ...prevState.setting,
         [name]: value,
       },
     }));
@@ -141,6 +156,61 @@ export function ModalProvider({ children }: Children) {
   return (
     <ModalContext.Provider value={{ isOpen, open, close }}>
       {children}
+      {isOpen('setting') &&
+        createPortal(
+          <Modal className="w-[80%]" isOpen onClose={close} onSubmit={handleSubmit}>
+            <div className="flex justify-between">
+              <div className="w-[48%]">
+                <div className="flex flex-col gap-1 pb-2">
+                  <div className="flex justify-between">
+                    <h2>워드프레스</h2>
+                  </div>
+                  <Select title="닉네임을 선택해주세요" items={['2020', '2222', '1111', '2223', '3024']} />
+                </div>
+                <div className="flex flex-col gap-1 pb-2">
+                  <div className="flex justify-between">
+                    <h2>쿠팡파트너스</h2>
+                  </div>
+                  <Select title="닉네임을 선택해주세요" items={['2020', '2222', '1111', '2223', '3024']} />
+                </div>
+                <div className="flex flex-col gap-1 pb-2">
+                  <div className="flex justify-between">
+                    <h2>GPT</h2>
+                  </div>
+                  <Select title="닉네임을 선택해주세요" items={['2020', '2222', '1111', '2223', '3024']} />
+                </div>
+              </div>
+              <div className="w-[48%]">
+                <div className="flex flex-col gap-1 pb-2">
+                  <div className="flex justify-between">
+                    <h2>포스팅 주제 설정</h2>
+                  </div>
+                  <Select title="포스팅 주제를 선택해주세요" items={['2020', '2222', '1111', '2223', '3024']} />
+                </div>
+                <div className="flex flex-col gap-1 pb-2">
+                  <div className="flex flex-col">
+                    <h2>예약 발행 스케줄 설정</h2>
+                    <ol className="flex">
+                      <li className="flex gap-1 items-center pr-1 whitespace-nowrap">
+                        <Select title="0" items={DATE} />
+                        일마다
+                      </li>
+                      <li className="flex gap-1 items-center pr-1 whitespace-nowrap">
+                        <Select title="0" items={HOUR} />
+                        시간마다
+                      </li>
+                      <li className="flex gap-1 items-center pr-1 whitespace-nowrap">
+                        <Select title="0" items={MINUTE} />
+                        분마다
+                      </li>
+                    </ol>
+                  </div>{' '}
+                </div>
+              </div>
+            </div>
+          </Modal>,
+          document.body
+        )}
       {isOpen('coupang') &&
         createPortal(
           <Modal isOpen onClose={close} onSubmit={handleSubmit}>
