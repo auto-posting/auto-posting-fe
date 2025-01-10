@@ -16,20 +16,20 @@ const SelectComponent = Object.assign({
 interface Select {
   title: string;
   label?: string;
-  items: string[];
-  onChange?: (value: string) => void;
+  items: (string | number)[];
+  onChange?: (value: string | number) => void;
 }
 
 export default function Select({ title, label, items, onChange }: Select) {
   const toggleState = useToggle();
   const [selectItems, setSelectItems] = useState(items);
-  const [selectedValue, setSelectedValue] = useState<string>(title);
+  const [selectedValue, setSelectedValue] = useState<string | number>(title);
 
   useEffect(() => {
     setSelectItems(items);
   }, [items]);
 
-  const handleSelect = (value: string) => {
+  const handleSelect = (value: string | number) => {
     setSelectedValue(value);
     onChange?.(value);
     toggleState.toggle();

@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Children from './children';
 import Modal from '../ui/Modal';
@@ -49,7 +49,7 @@ export function ModalProvider({ children }: Children) {
       interval_minutes: 0,
     },
   });
-  const { data: coupangData, execute: coupangExecute } = useFetch(() => getCoupangPartners());
+  const { data: coupangData, loading: coupangLoading, execute: coupangExecute } = useFetch(() => getCoupangPartners());
   const { execute: postCoupangExecute } = useFetch(() =>
     postCoupangPartners({
       api_key: formData.coupang.api_key,
@@ -58,7 +58,7 @@ export function ModalProvider({ children }: Children) {
     })
   );
 
-  const { data: openaiData, execute: openaiExecute } = useFetch(() => getOpenai());
+  const { data: openaiData, loading: openaiLoading, execute: openaiExecute } = useFetch(() => getOpenai());
   const { execute: postOpenaiExecute } = useFetch(() =>
     postOpenai({
       api_key: formData.openai.api_key,
@@ -66,7 +66,7 @@ export function ModalProvider({ children }: Children) {
     })
   );
 
-  const { data: wordpressData, execute: wordpressExecute } = useFetch(() => getOpenai());
+  const { data: wordpressData, loading: wordpressLoading, execute: wordpressExecute } = useFetch(() => getOpenai());
   const { execute: postWordpressExecute } = useFetch(() =>
     postWordpress({
       name: formData.wordpress.name,
@@ -141,18 +141,31 @@ export function ModalProvider({ children }: Children) {
     }
   };
 
-  useEffect(() => {
-    if (coupangData) {
-      console.log('Fetched data:', coupangData);
+  const fetchCoupangData = useCallback(() => {
+    if (!coupangLoading && !coupangData) {
+      coupangExecute();
     }
-    if (openaiData) {
-      console.log('Fetched data:', openaiData);
-    }
-    if (wordpressData) {
-      console.log('Fetched data:', wordpressData);
-    }
-  }, [coupangData, openaiData, wordpressData]);
+  }, [coupangData, coupangLoading, coupangExecute]);
 
+  const fetchOpenaiData = useCallback(() => {
+    if (!openaiLoading && !openaiData) {
+      openaiExecute();
+    }
+  }, [openaiData, openaiLoading, openaiExecute]);
+
+  const fetchWordpressData = useCallback(() => {
+    if (!wordpressLoading && !wordpressData) {
+      wordpressExecute();
+    }
+  }, [wordpressData, wordpressLoading, wordpressExecute]);
+
+  useEffect(() => {
+    fetchOpenaiData();
+    fetchCoupangData();
+    fetchWordpressData();
+  }, [fetchOpenaiData, fetchCoupangData, fetchWordpressData]);
+
+  console.log(wordpressData?.data);
   return (
     <ModalContext.Provider value={{ isOpen, open, close }}>
       {children}
@@ -165,19 +178,28 @@ export function ModalProvider({ children }: Children) {
                   <div className="flex justify-between">
                     <h2>워드프레스</h2>
                   </div>
-                  <Select title="닉네임을 선택해주세요" items={['2020', '2222', '1111', '2223', '3024']} />
+                  <Select
+                    title="닉네임을 선택해주세요"
+                    items={wordpressData?.data.map(item => item.nickname) || ['사용 가능한 닉네임이 없습니다']}
+                  />
                 </div>
                 <div className="flex flex-col gap-1 pb-2">
                   <div className="flex justify-between">
                     <h2>쿠팡파트너스</h2>
                   </div>
-                  <Select title="닉네임을 선택해주세요" items={['2020', '2222', '1111', '2223', '3024']} />
+                  <Select
+                    title="닉네임을 선택해주세요"
+                    items={coupangData?.data.map(item => item.nickname) || ['사용 가능한 닉네임이 없습니다']}
+                  />
                 </div>
                 <div className="flex flex-col gap-1 pb-2">
                   <div className="flex justify-between">
                     <h2>GPT</h2>
                   </div>
-                  <Select title="닉네임을 선택해주세요" items={['2020', '2222', '1111', '2223', '3024']} />
+                  <Select
+                    title="닉네임을 선택해주세요"
+                    items={openaiData?.data.map(item => item.nickname) || ['사용 가능한 닉네임이 없습니다']}
+                  />
                 </div>
               </div>
               <div className="w-[48%]">
