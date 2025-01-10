@@ -1,6 +1,6 @@
 import Button from '@/shared/ui/Button';
 import googleLogo from '@/assets/svgs/google-logo.svg';
-import { API_BASE_URL } from '@/shared/config/constants';
+import { API_BASE_URL } from '@/shared/config/constants/baseUrl';
 
 export default function Login() {
   const isLocal = window.location.origin.includes('127') ? true : false;

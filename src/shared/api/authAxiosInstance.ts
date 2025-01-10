@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/shared/config/constants';
+import { API_BASE_URL } from '@/shared/config/constants/baseUrl';
 import axios from 'axios';
 
 const baseURL = API_BASE_URL;

@@ -15,17 +15,18 @@ const SelectComponent = Object.assign({
 
 interface Select {
   title: string;
+  label?: string;
   items: string[];
 }
 
-export default function Select({ title, items }: Select) {
+export default function Select({ title, label, items }: Select) {
   const toggleState = useToggle();
   const [selectItems] = useState(items);
 
   return (
     <SelectContext.Provider value={toggleState}>
       <SelectComponent.Root>
-        <p className="flex justify-between">{title}</p>
+        <p className="flex justify-between">{label}</p>
         <SelectComponent.Trigger>{title}</SelectComponent.Trigger>
         <SelectComponent.Group>
           {selectItems.map((item, index) => (

@@ -1,5 +1,5 @@
 import { getAccessToken, getRefreshToken } from '@/shared/lib/cookie';
-import { API_BASE_URL } from '@/shared/config/constants';
+import { API_BASE_URL } from '@/shared/config/constants/baseUrl';
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { authAxiosInstance } from './authAxiosInstance';
 import { refreshToken } from '@/features/myInfo/api/userApi';
