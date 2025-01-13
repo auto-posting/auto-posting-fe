@@ -1,9 +1,5 @@
 import { axiosInstance } from '@/shared/api/axiosInstance';
-
-type GetCoupangResponse = {
-  message: string;
-  data: Record<string, string | number>[];
-};
+import { GetResponse } from '@/shared/model/type';
 
 type PostCoupangRequest = {
   api_key?: string;
@@ -16,7 +12,7 @@ type DeleteCoupangRequest = {
 };
 
 export async function getCoupangPartners() {
-  const response = await axiosInstance.get<GetCoupangResponse>('/api/coupangpartners');
+  const response = await axiosInstance.get<GetResponse>('/api/coupangpartners');
   return { data: response.data };
 }
 

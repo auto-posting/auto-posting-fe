@@ -1,9 +1,5 @@
 import { axiosInstance } from '@/shared/api/axiosInstance';
-
-type GetOpenaiResponse = {
-  message: string;
-  data: Record<string, string | number>[];
-};
+import { GetResponse } from '@/shared/model/type';
 
 type PostOpenaiRequest = {
   api_key?: string;
@@ -15,7 +11,7 @@ type DeleteOpenaiRequest = {
 };
 
 export async function getOpenai() {
-  const response = await axiosInstance.get<GetOpenaiResponse>('/api/openai');
+  const response = await axiosInstance.get<GetResponse>('/api/openai');
   return { data: response.data };
 }
 

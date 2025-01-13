@@ -1,9 +1,5 @@
 import { axiosInstance } from '@/shared/api/axiosInstance';
-
-type GetWordpressResponse = {
-  message: string;
-  data: Record<string, string | number>[];
-};
+import { GetResponse } from '@/shared/model/type';
 
 type PostWordpressRequest = {
   name: string;
@@ -17,7 +13,7 @@ type DeleteWordpressRequest = {
 };
 
 export async function getWordpress() {
-  const response = await axiosInstance.get<GetWordpressResponse>('/api/wordpress');
+  const response = await axiosInstance.get<GetResponse>('/api/wordpress');
   return { data: response.data };
 }
 
