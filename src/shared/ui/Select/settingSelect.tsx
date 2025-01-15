@@ -14,24 +14,31 @@ const SelectComponent = Object.assign({
 });
 
 interface Select {
+  name: string;
   title: string;
   label?: string;
   items: (string | number)[];
-  onChange?: (value: string | number) => void;
+  value?: string | number;
+  onChange?: (e: { target: { name: string; value: string | number } }) => void;
 }
 
-export default function Select({ title, label, items, onChange }: Select) {
+export default function Select({ title, name, label, items = [], value, onChange }: Select) {
   const toggleState = useToggle();
   const [selectItems, setSelectItems] = useState(items);
-  const [selectedValue, setSelectedValue] = useState<string | number>(title);
 
   useEffect(() => {
     setSelectItems(items);
   }, [items]);
 
-  const handleSelect = (value: string | number) => {
-    setSelectedValue(value);
-    onChange?.(value);
+  const handleSelect = (item: string | number) => {
+    if (onChange) {
+      onChange({
+        target: {
+          name: name,
+          value: item,
+        },
+      });
+    }
     toggleState.toggle();
   };
 
@@ -39,7 +46,7 @@ export default function Select({ title, label, items, onChange }: Select) {
     <SelectContext.Provider value={toggleState}>
       <SelectComponent.Root>
         <p className="flex justify-between">{label}</p>
-        <SelectComponent.Trigger>{selectedValue}</SelectComponent.Trigger>
+        <SelectComponent.Trigger>{value !== 0 ? value?.toString() : title}</SelectComponent.Trigger>
         <SelectComponent.Group>
           {selectItems.map((item, index) => (
             <Fragment key={`item-${index}`}>
