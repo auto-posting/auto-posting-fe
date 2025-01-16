@@ -15,8 +15,26 @@ type SettingRequest = {
   interval_minutes: number;
 };
 
+type GetSettingList = {
+  message: string;
+  data: SettingResponse[];
+};
+
+type SettingResponse = {
+  id: number;
+  gpt_id: number;
+  user_id: number;
+  coupang_id: number;
+  gpt_topic_id: number;
+  interval_days: number;
+  wordpress_id: number;
+  interval_hours: number;
+  interval_minutes: number;
+  scheduled_time: number;
+};
+
 export async function getSettingList() {
-  const response = await axiosInstance.get<GetResponse>('/api/wordpress-setting/wordpress-setting');
+  const response = await axiosInstance.get<GetSettingList>('/api/wordpress-setting/wordpress-setting');
   return { data: response.data };
 }
 
