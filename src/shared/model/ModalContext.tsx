@@ -7,9 +7,10 @@ import Input from '../ui/Input';
 import { getCoupangPartners, postCoupangPartners } from '@/features/coupangPartners/api';
 import useFetch from './useFetch';
 import { getOpenai, postOpenai } from '@/features/openAi/api';
-import { postWordpress } from '@/features/wordPress/api';
+import { getWordpress, postWordpress } from '@/features/wordPress/api';
 import { DATE, HOUR, MINUTE } from '../config/constants/time';
 import Select from '@/shared/ui/Select/settingSelect';
+import { createSetting, getGptTopics, getSettingList } from '@/features/setting/api';
 
 export type ModalType = 'wordpress' | 'coupang' | 'openai' | 'setting';
 
@@ -39,15 +40,15 @@ export function ModalProvider({ children }: Children) {
       api_key: '',
       nickname: '',
     },
-    setting: {
-      wordpress_id: 0,
-      coupang_id: 0,
-      gpt_id: 0,
-      gpt_topic_id: 0,
-      interval_days: 0,
-      interval_hours: 0,
-      interval_minutes: 0,
-    },
+  });
+  const [settingData, setSettingData] = useState({
+    wordpress_id: 0,
+    coupang_id: 0,
+    gpt_id: 0,
+    gpt_topic_id: 0,
+    interval_days: 0,
+    interval_hours: 0,
+    interval_minutes: 0,
   });
   const { data: coupangData, loading: coupangLoading, execute: coupangExecute } = useFetch(() => getCoupangPartners());
   const { execute: postCoupangExecute } = useFetch(() =>
@@ -66,13 +67,27 @@ export function ModalProvider({ children }: Children) {
     })
   );
 
-  const { data: wordpressData, loading: wordpressLoading, execute: wordpressExecute } = useFetch(() => getOpenai());
+  const { data: wordpressData, loading: wordpressLoading, execute: wordpressExecute } = useFetch(() => getWordpress());
   const { execute: postWordpressExecute } = useFetch(() =>
     postWordpress({
       name: formData.wordpress.name,
       password: formData.wordpress.password,
       url: formData.wordpress.url,
       nickname: formData.wordpress.nickname,
+    })
+  );
+  const { data: gptTopics, loading: gptTopicsLoading, execute: gptTopicsExecute } = useFetch(() => getGptTopics());
+
+  const { execute: settingListExecute } = useFetch(() => getSettingList());
+  const { execute: postSetting } = useFetch(() =>
+    createSetting({
+      wordpress_id: Number(wordpressData?.data.find(item => item.nickname === settingData.wordpress_id)?.id),
+      coupang_id: Number(coupangData?.data.find(item => item.nickname === settingData.coupang_id)?.id),
+      gpt_id: Number(openaiData?.data.find(item => item.nickname === settingData.gpt_id)?.id),
+      gpt_topic_id: Number(gptTopics?.data.find(item => item.topic === settingData.gpt_topic_id)?.id),
+      interval_days: Number(settingData.interval_days),
+      interval_hours: Number(settingData.interval_hours),
+      interval_minutes: Number(settingData.interval_minutes),
     })
   );
 
@@ -92,10 +107,15 @@ export function ModalProvider({ children }: Children) {
         ...prevState.wordpress,
         [name]: value,
       },
-      setting: {
-        ...prevState.setting,
-        [name]: value,
-      },
+    }));
+  };
+
+  const handleSelectChange = (e: { target: { name: string; value: string | number } }) => {
+    const { name, value } = e.target;
+
+    setSettingData(prevState => ({
+      ...prevState,
+      [name]: value,
     }));
   };
 
@@ -132,6 +152,20 @@ export function ModalProvider({ children }: Children) {
         await postWordpressExecute();
         await wordpressExecute();
       }
+      if (currentModal === 'setting') {
+        if (
+          !String(settingData.coupang_id).trim() ||
+          !String(settingData.gpt_id).trim() ||
+          !String(settingData.gpt_topic_id).trim() ||
+          !String(settingData.wordpress_id).trim() ||
+          !String(settingData.wordpress_id).trim()
+        ) {
+          alert('값을 입력하세요.');
+          return;
+        }
+        await postSetting();
+        await settingListExecute();
+      }
 
       close();
       alert('처리가 완료되었습니다.');
@@ -159,13 +193,19 @@ export function ModalProvider({ children }: Children) {
     }
   }, [wordpressData, wordpressLoading, wordpressExecute]);
 
+  const fetchGptTopics = useCallback(() => {
+    if (!gptTopicsLoading && !gptTopics) {
+      gptTopicsExecute();
+    }
+  }, [gptTopics, gptTopicsLoading, gptTopicsExecute]);
+
   useEffect(() => {
     fetchOpenaiData();
     fetchCoupangData();
     fetchWordpressData();
-  }, [fetchOpenaiData, fetchCoupangData, fetchWordpressData]);
+    fetchGptTopics();
+  }, [fetchOpenaiData, fetchCoupangData, fetchWordpressData, fetchGptTopics]);
 
-  console.log(wordpressData?.data);
   return (
     <ModalContext.Provider value={{ isOpen, open, close }}>
       {children}
@@ -179,8 +219,11 @@ export function ModalProvider({ children }: Children) {
                     <h2>워드프레스</h2>
                   </div>
                   <Select
+                    name="wordpress_id"
                     title="닉네임을 선택해주세요"
                     items={wordpressData?.data.map(item => item.nickname) || ['사용 가능한 닉네임이 없습니다']}
+                    value={settingData.wordpress_id}
+                    onChange={handleSelectChange}
                   />
                 </div>
                 <div className="flex flex-col gap-1 pb-2">
@@ -188,8 +231,11 @@ export function ModalProvider({ children }: Children) {
                     <h2>쿠팡파트너스</h2>
                   </div>
                   <Select
+                    name="coupang_id"
                     title="닉네임을 선택해주세요"
                     items={coupangData?.data.map(item => item.nickname) || ['사용 가능한 닉네임이 없습니다']}
+                    value={settingData.coupang_id}
+                    onChange={handleSelectChange}
                   />
                 </div>
                 <div className="flex flex-col gap-1 pb-2">
@@ -197,8 +243,11 @@ export function ModalProvider({ children }: Children) {
                     <h2>GPT</h2>
                   </div>
                   <Select
+                    name="gpt_id"
                     title="닉네임을 선택해주세요"
                     items={openaiData?.data.map(item => item.nickname) || ['사용 가능한 닉네임이 없습니다']}
+                    value={settingData.gpt_id}
+                    onChange={handleSelectChange}
                   />
                 </div>
               </div>
@@ -207,22 +256,46 @@ export function ModalProvider({ children }: Children) {
                   <div className="flex justify-between">
                     <h2>포스팅 주제 설정</h2>
                   </div>
-                  <Select title="포스팅 주제를 선택해주세요" items={['2020', '2222', '1111', '2223', '3024']} />
+                  <Select
+                    name="gpt_topic_id"
+                    title="포스팅 주제를 선택해주세요"
+                    items={gptTopics?.data.map(item => item.topic) || ['선택 가능한 포스팅 주제가 없습니다']}
+                    value={settingData.gpt_topic_id}
+                    onChange={handleSelectChange}
+                  />
                 </div>
                 <div className="flex flex-col gap-1 pb-2">
                   <div className="flex flex-col">
                     <h2>예약 발행 스케줄 설정</h2>
                     <ol className="flex">
                       <li className="flex gap-1 items-center pr-1 whitespace-nowrap">
-                        <Select title="0" items={DATE} />
+                        <Select
+                          name="interval_days"
+                          title="0"
+                          items={DATE}
+                          value={settingData.interval_days}
+                          onChange={handleSelectChange}
+                        />
                         일마다
                       </li>
                       <li className="flex gap-1 items-center pr-1 whitespace-nowrap">
-                        <Select title="0" items={HOUR} />
+                        <Select
+                          name="interval_hours"
+                          title="0"
+                          items={HOUR}
+                          value={settingData.interval_hours}
+                          onChange={handleSelectChange}
+                        />
                         시간마다
                       </li>
                       <li className="flex gap-1 items-center pr-1 whitespace-nowrap">
-                        <Select title="0" items={MINUTE} />
+                        <Select
+                          name="interval_minutes"
+                          title="0"
+                          items={MINUTE}
+                          value={settingData.interval_minutes}
+                          onChange={handleSelectChange}
+                        />
                         분마다
                       </li>
                     </ol>
