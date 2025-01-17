@@ -1,32 +1,28 @@
 import { axiosInstance } from '@/shared/api/axiosInstance';
+import { GetResponse } from '@/shared/model/type';
 
-type GetWordpressResponse = {
-  message: string;
-  data: Record<string, string | number>[];
-};
-
-type PostWordpressResquest = {
+type PostWordpressRequest = {
   name: string;
   password: string;
   url: string;
   nickname: string;
 };
 
-type DeleteWordpressResquest = {
+type DeleteWordpressRequest = {
   wordpress_id?: number;
 };
 
 export async function getWordpress() {
-  const response = await axiosInstance.get<GetWordpressResponse>('/api/wordpress');
+  const response = await axiosInstance.get<GetResponse>('/api/wordpress');
   return { data: response.data };
 }
 
-export async function postWordpress(body: PostWordpressResquest) {
+export async function postWordpress(body: PostWordpressRequest) {
   const response = await axiosInstance.post('/api/wordpress', body);
   return { data: response.data };
 }
 
-export async function deleteWordpress({ wordpress_id }: DeleteWordpressResquest) {
+export async function deleteWordpress({ wordpress_id }: DeleteWordpressRequest) {
   if (wordpress_id === undefined) {
     throw new Error('wordpress_id is undefined. Cannot proceed with deletion.');
   }
