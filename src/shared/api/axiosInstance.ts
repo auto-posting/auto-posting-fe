@@ -33,25 +33,27 @@ const onRejected = async (error: AxiosError | Error) => {
     if (error.response) {
       const { status } = error.response;
 
-      if (status === 401 && originalRequest && !originalRequest._retry) {
+      if (status === 401 && REFRESH_TOKEN !== 'undefined' && originalRequest && !originalRequest._retry) {
         originalRequest._retry = true;
+
         try {
           const response = await refreshToken({ REFRESH_TOKEN });
           const newAccessToken = response.data.access_token;
 
           if (document) {
-            document.cookie = `access_token=${newAccessToken}; path=/`;
+            document.cookie = `accessToken=${newAccessToken}; path=/`;
           }
 
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return authAxiosInstance(originalRequest);
         } catch (refreshError) {
+          console.error('Failed to refresh token:', refreshError);
           return Promise.reject(refreshError);
         }
       }
     }
   } else {
-    console.log(`error: ${error.message}`);
+    console.log(`Error: ${error.message}`);
   }
 
   return Promise.reject(error);

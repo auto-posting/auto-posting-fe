@@ -11,6 +11,7 @@ import { getWordpress, postWordpress } from '@/features/wordPress/api';
 import { DATE, HOUR, MINUTE } from '../config/constants/time';
 import Select from '@/shared/ui/Select/settingSelect';
 import { createSetting, getGptTopics, getSettingList } from '@/features/setting/api';
+import useAuth from '@/features/auth/model/useAuth';
 
 export type ModalType = 'wordpress' | 'coupang' | 'openai' | 'setting';
 
@@ -23,6 +24,8 @@ export interface ModalContext {
 export const ModalContext = createContext<ModalContext | undefined>(undefined);
 
 export function ModalProvider({ children }: Children) {
+  const { isAuth } = useAuth();
+
   const { isOpen, open, close, openModal } = useModalOpen();
   const [formData, setFormData] = useState({
     wordpress: {
@@ -200,10 +203,12 @@ export function ModalProvider({ children }: Children) {
   }, [gptTopics, gptTopicsLoading, gptTopicsExecute]);
 
   useEffect(() => {
-    fetchOpenaiData();
-    fetchCoupangData();
-    fetchWordpressData();
-    fetchGptTopics();
+    if (isAuth) {
+      fetchOpenaiData();
+      fetchCoupangData();
+      fetchWordpressData();
+      fetchGptTopics();
+    }
   }, [fetchOpenaiData, fetchCoupangData, fetchWordpressData, fetchGptTopics]);
 
   return (

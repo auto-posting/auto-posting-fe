@@ -7,8 +7,8 @@ import { useCookies } from 'react-cookie';
 import GoogleCallback from '@/pages/googleCallback';
 
 function ProtectedRoute({ element }: { element: JSX.Element }) {
-  const [cookies] = useCookies(['access_token']);
-  return cookies.access_token && cookies.access_token !== 'undefined' ? element : <Navigate to="/login" />;
+  const [cookies] = useCookies(['accessToken']);
+  return cookies.accessToken && cookies.accessToken !== 'undefined' ? element : <Navigate to="/login" />;
 }
 
 const router = createBrowserRouter([
