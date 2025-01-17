@@ -58,7 +58,7 @@ export async function updateSetting({ setting_id }: SettingId, body: SettingRequ
   return { data: response.data };
 }
 
-export async function deleteWordpress({ setting_id }: SettingId) {
+export async function deleteSetting({ setting_id }: SettingId) {
   if (setting_id === undefined) {
     throw new Error('setting_id is undefined. Cannot proceed with deletion.');
   }
