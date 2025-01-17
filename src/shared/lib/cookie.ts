@@ -10,5 +10,5 @@ function parseCookies() {
   return cookies;
 }
 
-export const getAccessToken = () => parseCookies()['access_token'];
-export const getRefreshToken = () => parseCookies()['refresh_token'];
+export const getAccessToken = () => parseCookies()['accessToken'];
+export const getRefreshToken = () => parseCookies()['refreshToken'];
