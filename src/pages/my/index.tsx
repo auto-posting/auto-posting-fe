@@ -4,7 +4,7 @@ import { userInfo } from '@/features/myInfo/api/userApi';
 import useFetch from '@/shared/model/useFetch';
 import Button from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import useModal from '@/shared/model/useModal';
 import Table from '@/shared/ui/Table';
 import { COUPANG_THEAD } from '@/features/coupangPartners/config/constants';
@@ -12,9 +12,17 @@ import { OPENAI_THEAD } from '@/features/openAi/config/constants';
 import { deleteOpenai, getOpenai } from '@/features/openAi/api';
 import { deleteWordpress, getWordpress } from '@/features/wordPress/api';
 import { WORDPRESS_THEAD } from '@/features/wordPress/config/constants';
+import { ModalContext } from '@/shared/model/ModalContext';
 
 export default function My() {
   const [isMyInfo, setIsMyInfo] = useState(true);
+  const modalContext = useContext(ModalContext);
+
+  if (!modalContext) {
+    throw new Error('ModalContext must be used within a ModalProvider');
+  }
+
+  const { formData } = modalContext;
 
   function clickToggleButton() {
     setIsMyInfo(prev => !prev);
@@ -48,7 +56,6 @@ export default function My() {
   });
 
   const { open } = useModal();
-
   const fetchUserData = useCallback(() => {
     if (!userInfoLoading && !userInfoData) {
       userInfoExecute();
@@ -118,6 +125,14 @@ export default function My() {
     fetchCoupangData();
     fetchWordpressData();
   }, [fetchUserData, fetchOpenaiData, fetchCoupangData, fetchWordpressData]);
+
+  useEffect(() => {
+    if (formData.coupang.api_key || formData.openai.api_key || formData.wordpress.name) {
+      coupangExecute();
+      openaiExecute();
+      wordpressExecute();
+    }
+  }, [formData]);
 
   return (
     <main className="flex justify-between px-20 py-20">
