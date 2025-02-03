@@ -196,25 +196,47 @@ export function ModalProvider({ children }: Children) {
           alert('값을 입력하세요.');
           return;
         }
+      }
+      const optimisticUpdate = async () => {
         if (currentModal === 'setting') {
+          const prevData = settingData;
+
           setSettingData(prevData => ({
             ...prevData,
             ...settingData,
           }));
-        }
-        await postSetting();
-        await settingListExecute();
-      }
 
-      if (currentModal !== 'setting') {
-        setFormData(prevData => ({
-          ...prevData,
-          [currentModal]: {
-            ...prevData[currentModal],
-            ...formData[currentModal],
-          },
-        }));
-      }
+          try {
+            await postSetting();
+            await settingListExecute();
+          } catch (error) {
+            setSettingData(prevData);
+            console.error('postSetting failed:', error);
+          }
+        }
+
+        if (currentModal !== 'setting') {
+          const prevData = formData;
+
+          setFormData(prevData => ({
+            ...prevData,
+            [currentModal]: {
+              ...prevData[currentModal],
+              ...formData[currentModal],
+            },
+          }));
+
+          try {
+            await postSetting();
+            await settingListExecute();
+          } catch (error) {
+            setFormData(prevData);
+            console.error('postSetting failed:', error);
+          }
+        }
+      };
+
+      optimisticUpdate();
 
       close();
       alert('처리가 완료되었습니다.');
