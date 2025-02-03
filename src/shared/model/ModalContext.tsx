@@ -15,10 +15,40 @@ import useAuth from '@/features/auth/model/useAuth';
 
 export type ModalType = 'wordpress' | 'coupang' | 'openai' | 'setting';
 
+export interface FormData {
+  wordpress: {
+    name: string;
+    password: string;
+    url: string;
+    nickname: string;
+  };
+  coupang: {
+    api_key: string;
+    api_secret: string;
+    nickname: string;
+  };
+  openai: {
+    api_key: string;
+    nickname: string;
+  };
+}
+
+export interface SettingData {
+  wordpress_id: number;
+  coupang_id: number;
+  gpt_id: number;
+  gpt_topic_id: number;
+  interval_days: number;
+  interval_hours: number;
+  interval_minutes: number;
+}
+
 export interface ModalContext {
   isOpen: (modalType: ModalType) => boolean;
   open: (modaltype: ModalType) => void;
   close: (modaltype: ModalType) => void;
+  formData: FormData;
+  settingData: SettingData;
 }
 
 export const ModalContext = createContext<ModalContext | undefined>(undefined);
@@ -27,7 +57,7 @@ export function ModalProvider({ children }: Children) {
   const { isAuth } = useAuth();
 
   const { isOpen, open, close, openModal } = useModalOpen();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     wordpress: {
       name: '',
       password: '',
@@ -44,7 +74,7 @@ export function ModalProvider({ children }: Children) {
       nickname: '',
     },
   });
-  const [settingData, setSettingData] = useState({
+  const [settingData, setSettingData] = useState<SettingData>({
     wordpress_id: 0,
     coupang_id: 0,
     gpt_id: 0,
@@ -166,9 +196,47 @@ export function ModalProvider({ children }: Children) {
           alert('값을 입력하세요.');
           return;
         }
-        await postSetting();
-        await settingListExecute();
       }
+      const optimisticUpdate = async () => {
+        if (currentModal === 'setting') {
+          const prevData = settingData;
+
+          setSettingData(prevData => ({
+            ...prevData,
+            ...settingData,
+          }));
+
+          try {
+            await postSetting();
+            await settingListExecute();
+          } catch (error) {
+            setSettingData(prevData);
+            console.error('postSetting failed:', error);
+          }
+        }
+
+        if (currentModal !== 'setting') {
+          const prevData = formData;
+
+          setFormData(prevData => ({
+            ...prevData,
+            [currentModal]: {
+              ...prevData[currentModal],
+              ...formData[currentModal],
+            },
+          }));
+
+          try {
+            await postSetting();
+            await settingListExecute();
+          } catch (error) {
+            setFormData(prevData);
+            console.error('postSetting failed:', error);
+          }
+        }
+      };
+
+      optimisticUpdate();
 
       close();
       alert('처리가 완료되었습니다.');
@@ -212,7 +280,7 @@ export function ModalProvider({ children }: Children) {
   }, [fetchOpenaiData, fetchCoupangData, fetchWordpressData, fetchGptTopics]);
 
   return (
-    <ModalContext.Provider value={{ isOpen, open, close }}>
+    <ModalContext.Provider value={{ isOpen, open, close, formData, settingData }}>
       {children}
       {isOpen('setting') &&
         createPortal(

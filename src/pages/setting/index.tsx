@@ -2,13 +2,22 @@ import { getCoupangPartners } from '@/features/coupangPartners/api';
 import { getOpenai } from '@/features/openAi/api';
 import { deleteSetting, getGptTopics, getSettingList } from '@/features/setting/api';
 import { getWordpress } from '@/features/wordPress/api';
+import { ModalContext } from '@/shared/model/ModalContext';
 import useFetch from '@/shared/model/useFetch';
 import useModal from '@/shared/model/useModal';
 import Button from '@/shared/ui/Button';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 
 export default function Setting() {
   const { open } = useModal();
+  const modalContext = useContext(ModalContext);
+
+  if (!modalContext) {
+    throw new Error('ModalContext must be used within a ModalProvider');
+  }
+
+  const { settingData } = modalContext;
+
   const { data: settingList, loading: settingLoading, execute: settingExecute } = useFetch(() => getSettingList());
   const fetchSettingList = useCallback(() => {
     if (!settingLoading && !settingList) {
@@ -70,6 +79,10 @@ export default function Setting() {
     fetchWordpressData();
     fetchGptTopics();
   }, [fetchSettingList, fetchCoupangData, fetchOpenaiData, fetchWordpressData, fetchGptTopics]);
+
+  useEffect(() => {
+    settingExecute();
+  }, [settingData]);
 
   return (
     <main className="flex flex-col p-10">
