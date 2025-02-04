@@ -44,4 +44,10 @@ button {
     color: #213547;
     background-color: #ffffff;
   }
+
+  @layer components {
+    .nav-link {
+      @apply sm:text-sub sm:mr-5 sm:font-bold sm:block hidden;
+    }
+  }
 }

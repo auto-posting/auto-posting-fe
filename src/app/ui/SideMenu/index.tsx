@@ -9,7 +9,7 @@ export default function SideMenu() {
   return (
     <ul
       ref={menuRef}
-      className="absolute top-13 right-0 flex flex-col bg-white text-sub border border-sub px-4 py-2 gap-2">
+      className="absolute top-12 right-0 flex flex-col bg-white text-sub border border-sub px-4 py-2 gap-2">
       <li>
         <Link to="/my" onClick={handleSideMenuOpen}>
           내 정보
