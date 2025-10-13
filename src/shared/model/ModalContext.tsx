@@ -290,7 +290,7 @@ export function ModalProvider({ children }: Children) {
       fetchWordpressData();
       fetchGptTopics();
     }
-  }, [fetchOpenaiData, fetchCoupangData, fetchWordpressData, fetchGptTopics]);
+  }, [fetchOpenaiData, fetchCoupangData, fetchWordpressData, fetchGptTopics, settingListExecute]);
 
   return (
     <ModalContext.Provider value={{ isOpen, open, close, formData, settingData }}>
