@@ -54,7 +54,7 @@ export async function getSetting({ setting_id }: SettingId) {
 }
 
 export async function updateSetting({ setting_id }: SettingId, body: SettingRequest) {
-  const response = await axiosInstance.post(`/api/wordpress-setting/wordpress-setting/${setting_id}`, body);
+  const response = await axiosInstance.put(`/api/wordpress-setting/wordpress-setting/${setting_id}`, body);
   return { data: response.data };
 }
 
